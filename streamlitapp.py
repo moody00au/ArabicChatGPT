@@ -5,18 +5,24 @@ import config
 # Use the OpenAI API key from the config file
 openai.api_key = config.openai_api_key
 
-def get_response(message):
-    if "chat_log" not in st.session_state:
-        st.session_state.chat_log = []
-    chat_log = st.session_state.chat_log
-    chat_log.append({"role": "user", "content": message})
-    
-    response = openai.ChatCompletion.create(
-        model="gpt-4",
-        messages=chat_log
+@st.cache(allow_output_mutation=True)
+def get_chat_models():
+    return openai.ChatCompletion.create(
+      model="gpt-4",
+      messages=[
+            {"role": "system", "content": "أنت مساعد مفيد."},
+            {"role": "user", "content": "مرحبا، من أنت؟"},
+        ]
     )
-    
-    chat_log.append({"role": "assistant", "content": response['choices'][0]['message']['content']})
+
+def get_response(message):
+    response = openai.ChatCompletion.create(
+      model="gpt-4",
+      messages=[
+            {"role": "system", "content": "أنت مساعد مفيد يتحدث العربية."},
+            {"role": "user", "content": message},
+        ]
+    )
     return response['choices'][0]['message']['content']
 
 def main():
@@ -27,12 +33,9 @@ def main():
                 </p>
                 """, unsafe_allow_html=True)
 
-    if "user_input" not in st.session_state:
-        st.session_state.user_input = ""
-    st.session_state.user_input = st.text_area("اكتب رسالتك هنا...", st.session_state.user_input)
-    
+    user_input = st.text_input("اكتب رسالتك هنا...")
     if st.button("إرسال"):
-        response = get_response(st.session_state.user_input)
+        response = get_response(user_input)
         st.markdown(f"<p style='text-align: right; dir:rtl;'>روبوت الدردشة: {response}</p>", unsafe_allow_html=True)
 
 if __name__ == "__main__":
