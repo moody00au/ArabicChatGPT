@@ -3,7 +3,7 @@ import openai
 import config
 
 # Use the OpenAI API key from the config file
-openai.api_key = config.openai_api_key
+openai.api_key = "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"
 
 @st.cache(allow_output_mutation=True)
 def get_chat_models():
