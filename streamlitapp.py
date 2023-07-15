@@ -1,9 +1,8 @@
 import streamlit as st
 import openai
-import config
 
-# Use the OpenAI API key from the config file
-openai.api_key = "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"
+# Use the OpenAI API key from Streamlit secrets
+openai.api_key = st.secrets["openai"]["api_key"]
 
 @st.cache(allow_output_mutation=True)
 def get_chat_models():
