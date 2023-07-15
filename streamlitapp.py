@@ -1,16 +1,14 @@
 import streamlit as st
 import openai
 import config
-import SessionState  # Assuming SessionState.py is in the same directory
 
 # Use the OpenAI API key from the config file
 openai.api_key = config.openai_api_key
 
-# Get the session state
-state = SessionState.get(user_input='', chat_log=[])
-
 def get_response(message):
-    chat_log = state.chat_log
+    if "chat_log" not in st.session_state:
+        st.session_state.chat_log = []
+    chat_log = st.session_state.chat_log
     chat_log.append({"role": "user", "content": message})
     
     response = openai.ChatCompletion.create(
@@ -18,7 +16,7 @@ def get_response(message):
         messages=chat_log
     )
     
-    state.chat_log.append({"role": "assistant", "content": response['choices'][0]['message']['content']})
+    chat_log.append({"role": "assistant", "content": response['choices'][0]['message']['content']})
     return response['choices'][0]['message']['content']
 
 def main():
@@ -29,9 +27,12 @@ def main():
                 </p>
                 """, unsafe_allow_html=True)
 
-    state.user_input = st.text_area("اكتب رسالتك هنا...", state.user_input)
+    if "user_input" not in st.session_state:
+        st.session_state.user_input = ""
+    st.session_state.user_input = st.text_area("اكتب رسالتك هنا...", st.session_state.user_input)
+    
     if st.button("إرسال"):
-        response = get_response(state.user_input)
+        response = get_response(st.session_state.user_input)
         st.markdown(f"<p style='text-align: right; dir:rtl;'>روبوت الدردشة: {response}</p>", unsafe_allow_html=True)
 
 if __name__ == "__main__":
