@@ -1,28 +1,24 @@
 import streamlit as st
 import openai
 import config
+import SessionState  # Assuming SessionState.py is in the same directory
 
 # Use the OpenAI API key from the config file
 openai.api_key = config.openai_api_key
 
-@st.cache(allow_output_mutation=True)
-def get_chat_models():
-    return openai.ChatCompletion.create(
-      model="gpt-4",
-      messages=[
-            {"role": "system", "content": "أنت مساعد مفيد."},
-            {"role": "user", "content": "مرحبا، من أنت؟"},
-        ]
-    )
+# Get the session state
+state = SessionState.get(user_input='', chat_log=[])
 
 def get_response(message):
+    chat_log = state.chat_log
+    chat_log.append({"role": "user", "content": message})
+    
     response = openai.ChatCompletion.create(
-      model="gpt-4",
-      messages=[
-            {"role": "system", "content": "أنت مساعد مفيد يتحدث العربية."},
-            {"role": "user", "content": message},
-        ]
+        model="gpt-4",
+        messages=chat_log
     )
+    
+    state.chat_log.append({"role": "assistant", "content": response['choices'][0]['message']['content']})
     return response['choices'][0]['message']['content']
 
 def main():
@@ -33,9 +29,9 @@ def main():
                 </p>
                 """, unsafe_allow_html=True)
 
-    user_input = st.text_input("اكتب رسالتك هنا...")
+    state.user_input = st.text_area("اكتب رسالتك هنا...", state.user_input)
     if st.button("إرسال"):
-        response = get_response(user_input)
+        response = get_response(state.user_input)
         st.markdown(f"<p style='text-align: right; dir:rtl;'>روبوت الدردشة: {response}</p>", unsafe_allow_html=True)
 
 if __name__ == "__main__":
