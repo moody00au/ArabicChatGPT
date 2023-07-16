@@ -8,7 +8,7 @@ To create a streamlit app with a clone of this repo, go to streamlit.io and foll
 
 To deploy the bot with your openai API key, please make sure you click on advanced settings and put your openai key in there in this format:
 [openai]
-openai.api_key = "YOUR API HERE"
+api_key = "YOUR API HERE"
 
 Help needed! Can you suggest a way to:
 
